@@ -60,9 +60,15 @@ export default function PortfolioChat() {
       })
       let result: { reply?: unknown; error?: unknown }
       try {
-        result = await response.json() as { reply?: unknown; error?: unknown }
+        result = JSON.parse(await response.text()) as { reply?: unknown; error?: unknown }
       } catch {
-        throw new Error('The assistant returned an invalid response. Please try again.')
+        if (response.headers.get('x-vercel-error') === 'FUNCTION_INVOCATION_FAILED') {
+          throw new Error('The chat service failed on Vercel. Please check the /api/chat function logs.')
+        }
+        if (response.status === 404) {
+          throw new Error('The chat service was not found on this deployment. Please redeploy the latest version.')
+        }
+        throw new Error(`The chat service returned an unexpected response (HTTP ${response.status}).`)
       }
       if (!response.ok) {
         throw new Error(typeof result.error === 'string' ? result.error : 'The assistant could not answer right now.')

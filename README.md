@@ -17,6 +17,17 @@ The floating portfolio assistant answers questions about Dismas and the projects
 using the public details in `src/portfolio-data.ts`. Its server-side endpoint is
 `api/chat.ts`; the OpenAI API key is never sent to the browser.
 
+Add project-specific answers to that project's `faqs` array:
+
+```ts
+faqs: [
+  { question: 'What was the main design challenge?', answer: 'Add your verified answer here.' },
+]
+```
+
+Keep answers factual; the assistant uses these entries as its source for
+project-specific FAQs.
+
 1. Add `OPENAI_API_KEY` to the Vercel project's Environment Variables for the
    environments where the site will run. Do not commit the key.
 2. Deploy the project to Vercel. Vercel serves the Vite site and the `/api/chat`
