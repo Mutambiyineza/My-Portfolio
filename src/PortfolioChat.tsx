@@ -1,0 +1,166 @@
+import { type FormEvent, useEffect, useRef, useState } from 'react'
+import { projects } from './portfolio-data'
+
+type ChatMessage = {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+const welcomeMessage: ChatMessage = {
+  role: 'assistant',
+  content: 'Hi, I’m Dismas’ portfolio assistant. Ask about his background, design approach, or any project.',
+}
+
+export default function PortfolioChat() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage])
+  const [input, setInput] = useState('')
+  const [isSending, setIsSending] = useState(false)
+  const [error, setError] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isOpen) inputRef.current?.focus()
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+        toggleRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [isOpen])
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [messages, isSending, error])
+
+  const sendMessage = async (rawMessage: string) => {
+    const content = rawMessage.trim()
+    if (!content || isSending) return
+
+    const userMessage: ChatMessage = { role: 'user', content }
+    const conversation = [...messages.slice(1), userMessage].slice(-12)
+    setMessages(current => [...current, userMessage])
+    setInput('')
+    setError('')
+    setIsSending(true)
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: conversation }),
+      })
+      let result: { reply?: unknown; error?: unknown }
+      try {
+        result = await response.json() as { reply?: unknown; error?: unknown }
+      } catch {
+        throw new Error('The assistant returned an invalid response. Please try again.')
+      }
+      if (!response.ok) {
+        throw new Error(typeof result.error === 'string' ? result.error : 'The assistant could not answer right now.')
+      }
+      const reply = result.reply
+      if (typeof reply !== 'string' || !reply.trim()) {
+        throw new Error('The assistant returned an empty reply. Please try again.')
+      }
+      setMessages(current => [...current, { role: 'assistant', content: reply.trim() }])
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Could not reach the assistant. Please try again.')
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    void sendMessage(input)
+  }
+
+  return (
+    <div className="portfolio-chat">
+      {isOpen && (
+        <section className="portfolio-chat__panel" id="portfolio-chat-panel" role="dialog" aria-label="Ask about Dismas and his work">
+          <header className="portfolio-chat__header">
+            <div>
+              <span className="portfolio-chat__eyebrow">DISMAS® / PORTFOLIO GUIDE</span>
+              <p><i aria-hidden="true" /> AI assistant · About &amp; selected work</p>
+            </div>
+            <button type="button" className="portfolio-chat__close" onClick={() => setIsOpen(false)} aria-label="Close chat">×</button>
+          </header>
+
+          <div className="portfolio-chat__messages" aria-live="polite" aria-relevant="additions" aria-busy={isSending}>
+            {messages.map((message, index) => (
+              <div className={`portfolio-chat__message portfolio-chat__message--${message.role}`} key={`${message.role}-${index}`}>
+                {message.content}
+              </div>
+            ))}
+
+            {messages.length === 1 && (
+              <div className="portfolio-chat__suggestions" aria-label="Frequently asked questions">
+                {projects.map(project => (
+                  <button
+                    type="button"
+                    key={project.code}
+                    onClick={() => void sendMessage(`Tell me about the challenge and design approach for ${project.title}.`)}
+                  >
+                    {project.title}
+                  </button>
+                ))}
+                <button type="button" onClick={() => void sendMessage('What is Dismas’ product design process?')}>
+                  Product design process
+                </button>
+              </div>
+            )}
+
+            {isSending && <div className="portfolio-chat__typing" role="status">Thinking…</div>}
+            {error && <p className="portfolio-chat__error" role="alert">{error}</p>}
+            <div ref={bottomRef} />
+          </div>
+
+          <p className="portfolio-chat__privacy">Replies are generated by OpenAI from public portfolio details. Please don’t share sensitive information.</p>
+          <form className="portfolio-chat__form" onSubmit={handleSubmit}>
+            <label className="sr-only" htmlFor="portfolio-chat-input">Ask a question about Dismas or his projects</label>
+            <input
+              ref={inputRef}
+              id="portfolio-chat-input"
+              type="text"
+              maxLength={1500}
+              value={input}
+              onChange={event => setInput(event.target.value)}
+              placeholder="Ask about a project…"
+              autoComplete="off"
+            />
+            <button type="submit" disabled={isSending || !input.trim()} aria-label="Send message">↗</button>
+          </form>
+        </section>
+      )}
+
+      <button
+        type="button"
+        ref={toggleRef}
+        className="portfolio-chat__toggle"
+        aria-expanded={isOpen}
+        aria-controls="portfolio-chat-panel"
+        aria-label={isOpen ? 'Close portfolio assistant' : 'Ask about my work'}
+        onClick={() => setIsOpen(open => !open)}
+      >
+        {isOpen ? (
+          <span aria-hidden="true">×</span>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-9.5a7.5 7.5 0 1 1 17 0Z" />
+            <path d="M8 11h8M8 14.5h5" />
+          </svg>
+        )}
+      </button>
+    </div>
+  )
+}
