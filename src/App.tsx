@@ -390,7 +390,7 @@ export default function App() {
           <div className="contact__aside reveal">
             <p>Have a project, an idea, or a good question? Tell me what you’re making.</p>
             <a href="mailto:hello@dismas.design">hello@dismas.design <Arrow diagonal /></a>
-            <div className="socials"><a href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn <Arrow diagonal /></a><a href="https://behance.net" target="_blank" rel="noreferrer">Behance <Arrow diagonal /></a></div>
+            <div className="socials"><a href="https://www.linkedin.com/in/mutambiyineza-dismas-75678a231/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow diagonal /></a><a href="https://www.behance.net/mutambidismas" target="_blank" rel="noopener noreferrer">Behance <Arrow diagonal /></a></div>
           </div>
           <form className="contact-form reveal" onSubmit={submitContact}>
             <label><span>01 / Your name</span><input required name="name" placeholder="What should I call you?" /></label>
