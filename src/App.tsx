@@ -1,5 +1,6 @@
 import { type FormEvent, type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react'
 import PortfolioChat from './PortfolioChat'
+import DrivePointCaseStudy from './DrivePointCaseStudy'
 import { experience, projects } from './portfolio-data'
 
 type WeatherReading = {
@@ -332,8 +333,17 @@ export default function App() {
             <article className={`project project--${index + 1} reveal`} key={project.title}>
               <button className="project__visual" onMouseEnter={() => setCursorLabel('VIEW PROJECT')} onMouseLeave={() => setCursorLabel('')} onClick={() => openProject(index)} aria-label={`View ${project.title} case study`}>
                 <div className={`project-art project-art--${project.accent}`}>
-                  {index === 0 && <div className="ui-window"><span /><strong>Drive better.</strong><b>Find your next move</b></div>}
-                  {index === 1 && <><span className="giant-letter">P</span><span className="pinn-label">CREATE / LEARN / GROW</span></>}
+                  {index === 0 && (
+                    <div className="ui-window">
+                      <div className="ui-window__brand">
+                        <img src="/assets/drivepoint/drivepoint-logo.svg" alt="" aria-hidden="true" />
+                      </div>
+                      <span />
+                      <strong>Drive better.</strong>
+                      <b>Find your next move</b>
+                    </div>
+                  )}
+                  {index === 1 && <><span className="giant-letter">G</span><span className="grow-label">WEB / MOBILE / UI·UX</span></>}
                   {index === 2 && <><div className="sun" /><span className="journey-type">desire<br />journeys</span></>}
                   {index === 3 && <><div className="edge-mark">I/E</div><span className="edge-copy">FORM / MATERIAL / EDGE</span></>}
                   {index === 4 && <><div className="arch" /><span className="ambrose-type">ST AMBROSE</span></>}
@@ -405,18 +415,28 @@ export default function App() {
       {activeProject !== null && (
         <div className="case-study" role="dialog" aria-modal="true" aria-label={`${projects[activeProject].title} case study`}>
           <button className="case-study__close" onClick={closeProject}>Close <span>×</span></button>
-          <div className={`case-study__cover project-art--${projects[activeProject].accent}`}>
-            <div className="case-study__cover-meta"><span>0{activeProject + 1} / 06</span><span>{projects[activeProject].category}</span></div>
-            <h2>{projects[activeProject].title}</h2><span className="case-study__code">{projects[activeProject].code}</span>
-          </div>
-          <div className="case-study__body">
-            <div className="case-study__intro"><span className="section-index">[ PROJECT OVERVIEW ]</span><p>{projects[activeProject].description}</p><dl><div><dt>Discipline</dt><dd>{projects[activeProject].category}</dd></div><div><dt>Year</dt><dd>{projects[activeProject].year}</dd></div></dl></div>
-            <div className="case-study__chapter"><span>01 / Challenge</span><p>{projects[activeProject].challenge}</p></div>
-            <div className="case-study__image"><span>{projects[activeProject].code}</span><i>VISUAL STUDY / 01</i></div>
-            <div className="case-study__chapter"><span>02 / Creative approach</span><p>{projects[activeProject].approach}</p></div>
-            <div className="case-study__note">Selected visual material is represented by art-directed placeholders while the full project archive is being prepared.</div>
-            <button className="case-study__next" onClick={() => setActiveProject((activeProject + 1) % projects.length)}><span>Next project</span>{projects[(activeProject + 1) % projects.length].title}<Arrow /></button>
-          </div>
+          {projects[activeProject].code === 'DP' ? (
+            <DrivePointCaseStudy
+              project={projects[activeProject]}
+              nextProjectTitle={projects[(activeProject + 1) % projects.length].title}
+              onNextProject={() => setActiveProject((activeProject + 1) % projects.length)}
+            />
+          ) : (
+            <>
+              <div className={`case-study__cover project-art--${projects[activeProject].accent}`}>
+                <div className="case-study__cover-meta"><span>0{activeProject + 1} / 06</span><span>{projects[activeProject].category}</span></div>
+                <h2>{projects[activeProject].title}</h2><span className="case-study__code">{projects[activeProject].code}</span>
+              </div>
+              <div className="case-study__body">
+                <div className="case-study__intro"><span className="section-index">[ PROJECT OVERVIEW ]</span><p>{projects[activeProject].description}</p><dl><div><dt>Discipline</dt><dd>{projects[activeProject].category}</dd></div><div><dt>Year</dt><dd>{projects[activeProject].year}</dd></div></dl></div>
+                <div className="case-study__chapter"><span>01 / Challenge</span><p>{projects[activeProject].challenge}</p></div>
+                <div className="case-study__image"><span>{projects[activeProject].code}</span><i>VISUAL STUDY / 01</i></div>
+                <div className="case-study__chapter"><span>02 / Creative approach</span><p>{projects[activeProject].approach}</p></div>
+                <div className="case-study__note">Selected visual material is represented by art-directed placeholders while the full project archive is being prepared.</div>
+                <button className="case-study__next" onClick={() => setActiveProject((activeProject + 1) % projects.length)}><span>Next project</span>{projects[(activeProject + 1) % projects.length].title}<Arrow /></button>
+              </div>
+            </>
+          )}
         </div>
       )}
       <PortfolioChat />
