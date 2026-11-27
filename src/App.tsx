@@ -291,11 +291,11 @@ export default function App() {
             </div>
           </div>
         </div>
-        <h1 className="hero__headline" aria-label="I design things that make ideas real.">
-          <span className="headline-line"><span className="hero-word"><CharacterText text="I" staggerMs={48} /></span><span className="hero-word"><CharacterText text="DESIGN" startDelay={48} staggerMs={48} /></span><em className="cross" aria-hidden="true">+</em></span>
-          <span className="headline-line headline-line--offset"><span className="hero-word"><CharacterText text="THINGS" startDelay={336} staggerMs={48} /></span><span className="hero-word"><CharacterText text="THAT" startDelay={624} staggerMs={48} /></span></span>
-          <span className="headline-line"><span className="hero-word"><CharacterText text="MAKE" startDelay={816} staggerMs={48} /></span><span className="hero-word"><CharacterText text="IDEAS" startDelay={1008} staggerMs={48} /></span></span>
-          <span className="headline-line"><i className="hero-word"><CharacterText text="REAL." startDelay={1248} staggerMs={48} /></i></span>
+        <h1 className="hero__headline" aria-label="Your vision, understood. Your people, put first.">
+          <span className="headline-line"><span className="hero-word"><CharacterText text="YOUR" staggerMs={48} /></span><span className="hero-word"><CharacterText text="VISION," startDelay={192} staggerMs={48} /></span><em className="cross" aria-hidden="true">+</em></span>
+          <span className="headline-line headline-line--offset"><span className="hero-word"><CharacterText text="UNDERSTOOD." startDelay={528} staggerMs={48} /></span></span>
+          <span className="headline-line"><span className="hero-word"><CharacterText text="YOUR" startDelay={1104} staggerMs={48} /></span><span className="hero-word"><CharacterText text="PEOPLE," startDelay={1296} staggerMs={48} /></span></span>
+          <span className="headline-line"><i className="hero-word"><CharacterText text="PUT FIRST." startDelay={1680} staggerMs={48} /></i></span>
         </h1>
         <div ref={heroPortraitRef} className="hero__portrait">
           <div className="hero__portrait-frame">
@@ -305,9 +305,9 @@ export default function App() {
           <div className="portrait-mark" aria-hidden="true">D®</div>
         </div>
         <div className="hero__bottom hero-sequence">
-          <p>Graphic Designer. Product Designer.<br />Front-End Developer.</p>
-          <p className="hero__statement">I turn ideas into identities, experiences, and digital products.</p>
-          <div className="hero__actions"><button className="circle-link magnetic" onMouseMove={magneticMove} onMouseLeave={magneticReset} onClick={() => navigate('#work')}><Arrow /></button><span>Explore selected work</span></div>
+          <p>Brand Identity. Product Design.<br />Front-End Development.</p>
+          <p className="hero__statement">Not sure how to bring your idea to life? I’ll listen to your goals and understand your audience, then design a clear, thoughtful brand or digital experience with you.</p>
+          <div className="hero__actions"><button className="circle-link magnetic" onMouseMove={magneticMove} onMouseLeave={magneticReset} onClick={() => navigate('#contact')} aria-label="Start a project"><Arrow /></button><span>Start a project</span></div>
         </div>
         <div className="scroll-note">Scroll to discover</div>
       </section>
@@ -316,7 +316,7 @@ export default function App() {
         <div className="section-index">[ 001 — POSITIONING ]</div>
         <p aria-label="One creative mind. Multiple disciplines. Meaningful experiences.">
           <CharacterText text="One creative mind." />
-          {' '}<span><CharacterText text="Multiple disciplines." startDelay={360} /></span>
+          <br /><span><CharacterText text="Multiple disciplines." startDelay={360} /></span>
           <br /><CharacterText text="Meaningful experiences." startDelay={980} />
         </p>
         <div className="manifesto__sub">Combining visual communication, product thinking, and front-end development to create purposeful digital experiences.</div>

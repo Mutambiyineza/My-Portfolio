@@ -1,29 +1,97 @@
-import { type FormEvent, useEffect, useRef, useState } from 'react'
-import { projects } from './portfolio-data'
+import { useEffect, useRef, useState } from 'react'
+import { portfolioFaqs, projects } from './portfolio-data'
 
 type ChatMessage = {
   role: 'user' | 'assistant'
   content: string
+  suggestions?: string[]
 }
 
 const welcomeMessage: ChatMessage = {
   role: 'assistant',
-  content: 'Hi, I’m Dismas’ portfolio assistant. Ask about his background, design approach, or any project.',
+  content: 'Hi, I’m Dismas’ portfolio guide. Choose a question below to learn about his background, design approach, and selected projects.',
+}
+
+const projectAliases: Record<string, string[]> = {
+  DP: ['drive point', 'drivepoint'],
+  PN: ['pinn'],
+  DJ: ['desire journeys'],
+  IE: ['ironwood'],
+  SA: ['st ambrose', 'ambrose parish'],
+  XX: ['selected experiments', 'experiments'],
+}
+
+function normalizeQuestion(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+}
+
+function findPortfolioFaq(question: string) {
+  const normalized = normalizeQuestion(question)
+  return portfolioFaqs.find(item =>
+    [item.question, ...item.matches].some(match =>
+      normalized.includes(normalizeQuestion(match)),
+    ),
+  )
+}
+
+function findProject(question: string) {
+  const normalized = normalizeQuestion(question)
+  return projects.find(item =>
+    [item.title, ...(projectAliases[item.code] ?? [])]
+      .some(alias => normalized.includes(normalizeQuestion(alias))),
+  )
+}
+
+function findFaqAnswer(question: string) {
+  const faq = findPortfolioFaq(question)
+  if (faq) return faq.answer
+
+  const project = findProject(question)
+  if (!project) return null
+
+  const normalized = normalizeQuestion(question)
+  if (/\b(role|team|client|result|outcome|metric|impact|conversion|launch)\b/.test(normalized)) {
+    return 'That detail is not included in the saved offline information for this project.'
+  }
+
+  const asksChallenge = /\b(challenge|problem|brief|difficult)\b/.test(normalized)
+  const asksApproach = /\b(approach|design|visual|identity|solution|method)\b/.test(normalized)
+  if (asksChallenge && asksApproach) return `${project.challenge} ${project.approach}`
+  if (asksChallenge) return project.challenge
+  if (asksApproach) return project.approach
+  return project.description
+}
+
+function getFollowUpQuestions(question: string) {
+  const faq = findPortfolioFaq(question)
+  if (faq) {
+    return portfolioFaqs
+      .filter(item => item !== faq)
+      .slice(0, 3)
+      .map(item => item.question)
+  }
+
+  const project = findProject(question)
+  if (!project) return portfolioFaqs.slice(0, 3).map(item => item.question)
+
+  const normalized = normalizeQuestion(question)
+  const asksDescription = /\b(what is|tell me about|describe|overview)\b/.test(normalized)
+  const asksChallenge = /\b(challenge|problem|brief|difficult)\b/.test(normalized)
+  const asksApproach = /\b(approach|design|visual|identity|solution|method)\b/.test(normalized)
+  const suggestions: string[] = []
+
+  if (!asksDescription) suggestions.push(`What is ${project.title}?`)
+  if (!asksChallenge) suggestions.push(`What was the main design challenge for ${project.title}?`)
+  if (!asksApproach) suggestions.push(`How was ${project.title} approached?`)
+
+  return [...suggestions, ...portfolioFaqs.map(item => item.question)].slice(0, 3)
 }
 
 export default function PortfolioChat() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage])
-  const [input, setInput] = useState('')
-  const [isSending, setIsSending] = useState(false)
-  const [error, setError] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (isOpen) inputRef.current?.focus()
-  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
@@ -39,73 +107,53 @@ export default function PortfolioChat() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [messages, isSending, error])
+  }, [messages])
 
-  const sendMessage = async (rawMessage: string) => {
+  const sendMessage = (rawMessage: string) => {
     const content = rawMessage.trim()
-    if (!content || isSending) return
+    if (!content) return
 
     const userMessage: ChatMessage = { role: 'user', content }
-    const conversation = [...messages.slice(1), userMessage].slice(-12)
-    setMessages(current => [...current, userMessage])
-    setInput('')
-    setError('')
-    setIsSending(true)
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversation }),
-      })
-      let result: { reply?: unknown; error?: unknown }
-      try {
-        result = JSON.parse(await response.text()) as { reply?: unknown; error?: unknown }
-      } catch {
-        if (response.headers.get('x-vercel-error') === 'FUNCTION_INVOCATION_FAILED') {
-          throw new Error('The chat service failed on Vercel. Please check the /api/chat function logs.')
-        }
-        if (response.status === 404) {
-          throw new Error('The chat service was not found on this deployment. Please redeploy the latest version.')
-        }
-        throw new Error(`The chat service returned an unexpected response (HTTP ${response.status}).`)
-      }
-      if (!response.ok) {
-        throw new Error(typeof result.error === 'string' ? result.error : 'The assistant could not answer right now.')
-      }
-      const reply = result.reply
-      if (typeof reply !== 'string' || !reply.trim()) {
-        throw new Error('The assistant returned an empty reply. Please try again.')
-      }
-      setMessages(current => [...current, { role: 'assistant', content: reply.trim() }])
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Could not reach the assistant. Please try again.')
-    } finally {
-      setIsSending(false)
-    }
-  }
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    void sendMessage(input)
+    const answer = findFaqAnswer(content)
+    const suggestions = getFollowUpQuestions(content)
+    setMessages(current => [
+      ...current,
+      userMessage,
+      {
+        role: 'assistant',
+        content: answer ?? 'I don’t have a saved answer for that yet. Try asking about Dismas’ background, skills, experience, design process, or one of the selected projects.',
+        suggestions,
+      },
+    ])
   }
 
   return (
     <div className="portfolio-chat">
       {isOpen && (
-        <section className="portfolio-chat__panel" id="portfolio-chat-panel" role="dialog" aria-label="Ask about Dismas and his work">
+        <section className="portfolio-chat__panel" id="portfolio-chat-panel" role="dialog" aria-label="Frequently asked questions about Dismas and his work">
           <header className="portfolio-chat__header">
             <div>
-              <span className="portfolio-chat__eyebrow">DISMAS® / PORTFOLIO GUIDE</span>
-              <p><i aria-hidden="true" /> AI assistant · About &amp; selected work</p>
+              <span className="portfolio-chat__eyebrow">DISMAS® / FAQs</span>
+              <p><i aria-hidden="true" /> Select a question to explore</p>
             </div>
             <button type="button" className="portfolio-chat__close" onClick={() => setIsOpen(false)} aria-label="Close chat">×</button>
           </header>
 
-          <div className="portfolio-chat__messages" aria-live="polite" aria-relevant="additions" aria-busy={isSending}>
+          <div className="portfolio-chat__messages" aria-live="polite" aria-relevant="additions">
             {messages.map((message, index) => (
-              <div className={`portfolio-chat__message portfolio-chat__message--${message.role}`} key={`${message.role}-${index}`}>
-                {message.content}
+              <div key={`${message.role}-${index}`}>
+                <div className={`portfolio-chat__message portfolio-chat__message--${message.role}`}>
+                  {message.content}
+                </div>
+                {index === messages.length - 1 && message.role === 'assistant' && message.suggestions && (
+                  <div className="portfolio-chat__suggestions" aria-label="Suggested follow-up questions">
+                    {message.suggestions.map(suggestion => (
+                      <button type="button" key={suggestion} onClick={() => sendMessage(suggestion)}>
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 
@@ -115,37 +163,30 @@ export default function PortfolioChat() {
                   <button
                     type="button"
                     key={project.code}
-                    onClick={() => void sendMessage(`Tell me about the challenge and design approach for ${project.title}.`)}
+                    onClick={() => sendMessage(`Tell me about the challenge and design approach for ${project.title}.`)}
                   >
                     {project.title}
                   </button>
                 ))}
-                <button type="button" onClick={() => void sendMessage('What is Dismas’ product design process?')}>
+                <button type="button" onClick={() => sendMessage('What is Dismas’ product design process?')}>
                   Product design process
+                </button>
+                <button type="button" onClick={() => sendMessage('Who is Dismas?')}>
+                  About Dismas
+                </button>
+                <button type="button" onClick={() => sendMessage('What design tools does Dismas use?')}>
+                  Design tools
+                </button>
+                <button type="button" onClick={() => sendMessage('What did Dismas study?')}>
+                  Education
                 </button>
               </div>
             )}
 
-            {isSending && <div className="portfolio-chat__typing" role="status">Thinking…</div>}
-            {error && <p className="portfolio-chat__error" role="alert">{error}</p>}
             <div ref={bottomRef} />
           </div>
 
-          <p className="portfolio-chat__privacy">Replies are generated by OpenAI from public portfolio details. Please don’t share sensitive information.</p>
-          <form className="portfolio-chat__form" onSubmit={handleSubmit}>
-            <label className="sr-only" htmlFor="portfolio-chat-input">Ask a question about Dismas or his projects</label>
-            <input
-              ref={inputRef}
-              id="portfolio-chat-input"
-              type="text"
-              maxLength={1500}
-              value={input}
-              onChange={event => setInput(event.target.value)}
-              placeholder="Ask about a project…"
-              autoComplete="off"
-            />
-            <button type="submit" disabled={isSending || !input.trim()} aria-label="Send message">↗</button>
-          </form>
+          <p className="portfolio-chat__privacy">Answers use saved CV and portfolio details. This guide works without a network connection.</p>
         </section>
       )}
 
@@ -155,16 +196,13 @@ export default function PortfolioChat() {
         className="portfolio-chat__toggle"
         aria-expanded={isOpen}
         aria-controls="portfolio-chat-panel"
-        aria-label={isOpen ? 'Close portfolio assistant' : 'Ask about my work'}
+        aria-label={isOpen ? 'Close FAQs' : 'Open FAQs'}
         onClick={() => setIsOpen(open => !open)}
       >
         {isOpen ? (
-          <span aria-hidden="true">×</span>
+          <span className="portfolio-chat__toggle-close" aria-hidden="true">×</span>
         ) : (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-9.5a7.5 7.5 0 1 1 17 0Z" />
-            <path d="M8 11h8M8 14.5h5" />
-          </svg>
+          <span className="portfolio-chat__toggle-label" aria-hidden="true">FAQs</span>
         )}
       </button>
     </div>

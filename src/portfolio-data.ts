@@ -15,6 +15,12 @@ export type ProjectFaq = {
   answer: string
 }
 
+export type SavedFaq = {
+  question: string
+  matches: string[]
+  answer: string
+}
+
 export const projects: Project[] = [
   {
     title: 'Drive Point Auto Group',
@@ -109,9 +115,10 @@ export const projects: Project[] = [
 ]
 
 export const experience = [
-  ['Pinn Creative Hub', 'UI/UX Lead & Trainer', 'Present'],
-  ['Grow Rwanda Advisors', 'UI/UX Designer', 'Recent'],
-  ['Vanguard Economics', 'Videography Intern', 'Earlier'],
+  ['Pinn Creative Hub', 'UI/UX Lead', 'Sep 2022–Feb 2026'],
+  ['Iwacu Finance Ltd', 'Senior UI/UX Designer', 'Aug 2024–Present'],
+  ['Grow Rwanda Advisors', 'UI/UX Designer', 'Oct 2024–Present'],
+  ['Vanguard Economics', 'Videographer / Photographer', 'Dec 2023–Aug 2024'],
   ['Independent Practice', 'Graphic Design & Digital Projects', 'Ongoing'],
 ] as const
 
@@ -127,3 +134,71 @@ export const portfolioProfile = {
   ],
   contact: 'hello@dismas.design',
 }
+
+export const portfolioFaqs: SavedFaq[] = [
+  {
+    question: 'Who is Dismas?',
+    matches: ['who is dismas', 'tell me about dismas', 'about dismas', 'dismas background'],
+    answer: 'Mutambiyineza Dismas is a Kigali-based creative designer with over three years of experience in communication design, graphic design, branding, and UI/UX.',
+  },
+  {
+    question: 'What kind of work does Dismas do?',
+    matches: ['what does dismas do', 'what services', 'services does he offer', 'his specialties', 'his expertise'],
+    answer: 'Dismas works across graphic and communication design, visual identity and branding, UI/UX and product design, and front-end development for digital experiences.',
+  },
+  {
+    question: 'What is Dismas’ product design process?',
+    matches: ['product design process', 'design process', 'ui ux process', 'how does dismas approach design'],
+    answer: 'Dismas describes an end-to-end, user-centered process: research and discovery, user flows and wireframes, prototypes, high-fidelity interface design, and handoff. His CV also describes interviews, surveys, usability testing, and collaboration with developers, product managers, and stakeholders.',
+  },
+  {
+    question: 'What design tools does Dismas use?',
+    matches: ['design tools', 'what tools', 'software does he use', 'which software', 'figma', 'adobe tools'],
+    answer: 'The tools listed on Dismas’ CV include Figma, Adobe Illustrator, Photoshop, InDesign, Premiere Pro, Audition, Framer, and Microsoft Office.',
+  },
+  {
+    question: 'What did Dismas study?',
+    matches: ['education', 'degree', 'what did dismas study', 'bachelor'],
+    answer: 'Dismas earned a Bachelor with Honors in Creative Design, specializing in Communication Design, from the University of Rwanda.',
+  },
+  {
+    question: 'What languages does Dismas speak?',
+    matches: ['languages', 'what languages', 'which languages'],
+    answer: 'Dismas lists English, Kinyarwanda, and French. The CV does not specify proficiency levels.',
+  },
+  {
+    question: 'What was Dismas’ role at Pinn Creative Hub?',
+    matches: ['dismas role at pinn', 'role at pinn', 'pinn experience', 'ui ux lead at pinn', 'work at pinn creative hub'],
+    answer: 'Dismas was UI/UX Lead at Pinn Creative Hub from September 2022 to February 2026. He led design from research and wireframing through visual design and handoff, and worked on design systems, user research, prototypes, and collaboration with product and development teams.',
+  },
+  {
+    question: 'What projects did Dismas work on at Grow Rwanda?',
+    matches: ['grow rwanda work', 'role at grow rwanda', 'grow rwanda projects', 'projects at grow rwanda'],
+    answer: 'At Grow Rwanda, Dismas works on web and mobile experiences. His CV names Drive Point Auto Group dealer websites, Landscape of Consciousness, Developers Network, GRA Recruiting, GRA Portfolio, Hoist Business Solutions’ WordPress site, and Bright Portfolios’ Squarespace site. He also contributes design to proposals and works with developers on expert feedback.',
+  },
+  {
+    question: 'What does Dismas do at Iwacu Finance?',
+    matches: ['iwacu finance', 'role at iwacu'],
+    answer: 'Dismas’ CV lists him as a Senior UI/UX Designer at Iwacu Finance Ltd from August 2024 to the present.',
+  },
+  {
+    question: 'What did Dismas do at Lions Design?',
+    matches: ['lions design', 'work at lions design'],
+    answer: 'At Lions Design Ltd, Dismas created logos and brand identities, brand packages, brochures, posters, and flyers. He prepared print-ready files and managed client relationships from consultation through delivery.',
+  },
+  {
+    question: 'What was Dismas’ work at Vanguard Economics?',
+    matches: ['vanguard economics', 'videography experience', 'photography experience'],
+    answer: 'At Vanguard Economics, Dismas worked on video and photography: developing scripts, scouting locations, setting up equipment and lighting, filming, reviewing and editing content, and photographing events and people.',
+  },
+  {
+    question: 'What did Dismas do at Energy Private Developers?',
+    matches: ['energy private developers', 're4sg conference'],
+    answer: 'At Energy Private Developers, Dismas worked on social media content and communication graphics, print materials such as brochures and posters, and graphics for the RE4SG 5th Edition Conference and Exhibition.',
+  },
+  {
+    question: 'What work did Dismas do for Rwanda Convention Bureau?',
+    matches: ['rwanda convention bureau', 'global brand speak'],
+    answer: 'Through Global Brand Speak, Dismas designed posters, presentations, bid books, and print materials for Rwanda Convention Bureau.',
+  },
+]

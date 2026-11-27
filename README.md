@@ -11,30 +11,21 @@ npm run build    # production build in /dist
 Replace `public/assets/dismas-portrait-placeholder.png` with your real portrait
 (keep the same filename, or update the two `<img>` tags in `src/App.tsx`).
 
-## Portfolio assistant
+## Portfolio FAQ guide
 
-The floating portfolio assistant answers questions about Dismas and the projects
-using the public details in `src/portfolio-data.ts`. Its server-side endpoint is
-`api/chat.ts`; the OpenAI API key is never sent to the browser.
+The floating portfolio guide uses saved questions and answers from the CV and
+the portfolio data in `src/portfolio-data.ts`. It runs entirely in the browser,
+does not contact an external service, and works without a network connection.
 
 Add project-specific answers to that project's `faqs` array:
 
 ```ts
 faqs: [
-  { question: 'What was the main design challenge?', answer: 'Add your verified answer here.' },
+  { question: 'What was the main design challenge?', answer: 'Your verified answer.' },
 ]
 ```
 
-Keep answers factual; the assistant uses these entries as its source for
-project-specific FAQs.
-
-1. Add `OPENAI_API_KEY` to the Vercel project's Environment Variables for the
-   environments where the site will run. Do not commit the key.
-2. Deploy the project to Vercel. Vercel serves the Vite site and the `/api/chat`
-   serverless function together.
-3. For local end-to-end testing, link the project with the Vercel CLI, put the
-   key in an ignored `.env.local` file, and run `vercel dev`; the regular Vite
-   dev server does not run Vercel Functions.
-
-Questions are sent to OpenAI to generate replies. The portfolio app does not
-save chat history between page loads; avoid entering sensitive information.
+Common questions about Dismas are in the `portfolioFaqs` list in
+`src/portfolio-data.ts`. Update the question, matching phrases, and answer
+together when adding or correcting an FAQ. Answers are curated and do not
+depend on an external service.
